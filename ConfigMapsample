@@ -1,0 +1,51 @@
+You can mount a specific file configured in ConfigMap using “subPath” as follows. This configuration steps are available on both OpenShift and Kubernetes.
+Configuration steps
+Create a test project, a test pod and a test text file for ConfigMap.
+// Create test pod and deploymentconfig.
+$ oc new-project test-configmap
+$ oc run test — image registry.redhat.io/rhel7 — tail -f /dev/null
+deploymentconfig.apps.openshift.io/test created
+// Create test.txt
+$ cat <<EOF > test.txt
+Test file
+EOF
+Create ConfigMap using created text file and configure the ConfigMap mount options to the deploymentConfig using “subPath”.
+// Create testmap ConfigMap using above test.txt file.
+$ oc create configmap testmap --from-file=test.txt
+
+// Modify volumes and volumeMounts for mounting only test.txt file to "/etc/test.txt".
+$ oc edit dc/test
+:
+containers:
+- name: test
+  :
+  volumeMounts:
+  - mountPath: /etc/test.txt
+    name: testtxt
+    subPath: test.txt
+:
+terminationGracePeriodSeconds: 30
+volumes:
+- configMap:
+    defaultMode: 420
+    items:
+    - key: test.txt
+      path: test.txt
+    name: testmap
+  name: testtxt
+:
+Test the configuration result.
+// You can verify test.txt after redeploying test pod after modification.
+$ oc rsh dc/test cat /etc/test.txt
+Test file
+
+// you can also verify test.txt file is only mounted to /etc directory as one specified file by subPath, not all directory.
+$ oc rsh dc/test ls -l /etc/
+total 888
+:
+drwxr-xr-x.  4 root root          151 Aug  3 09:13 systemd
+drwxr-xr-x.  2 root root            6 Aug 15  2017 terminfo
+-rw-r--r--.  1 root 1000110000     10 Aug 14 16:02 test.txt
+:
+drwxr-xr-x.  1 root root            6 Aug  3 09:37 yum.repos.d
+Thank you for reading.
