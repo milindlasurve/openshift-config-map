@@ -1,1 +1,5 @@
 oc login --username=portall --password=energy  https://api.uat.ipanlpm.com:6443 --insecure-skip-tls-verify=true
+
+docker registry
+oc login --username=portall --password=energy  https://api.uat.ipanlpm.com:6443 --insecure-skip-tls-verify=true
+docker login -u $(oc whoami) -p $(oc whoami -t) default-route-openshift-image-registry.apps.uat.ipanlpm.com
