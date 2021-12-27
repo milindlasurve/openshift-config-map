@@ -1,0 +1,1 @@
+oc login --username=portall --password=energy  https://api.uat.ipanlpm.com:6443 --insecure-skip-tls-verify=true
